@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     if (raw.length > 2000) return noContent();
     const body = JSON.parse(raw) as { path?: unknown; referrer?: unknown };
 
-    let path = typeof body.path === "string" ? body.path.split(/[?#]/)[0] : "";
+    let path = typeof body.path === "string" ? (body.path.split(/[?#]/)[0] ?? "") : "";
     if (!path.startsWith("/") || path.length > 200) return noContent();
     if (path.length > 1) path = path.replace(/\/+$/, "");
     if (SKIP_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) return noContent();
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
     const ownHosts = new Set<string>([new URL(siteConfig.url).hostname.replace(/^www\./, "")]);
     const reqHost = request.headers.get("host");
-    if (reqHost) ownHosts.add(reqHost.split(":")[0].replace(/^www\./, ""));
+    if (reqHost) ownHosts.add((reqHost.split(":")[0] ?? "").replace(/^www\./, ""));
 
     const country = (request.headers.get("x-vercel-ip-country") || request.headers.get("cf-ipcountry") || "")
       .toUpperCase()

@@ -39,7 +39,7 @@ export async function createPlanAction(_prev: PlanFormState, formData: FormData)
 
   const items: Parameters<typeof createPlanItems>[0] = [];
   for (const [i, line] of lines.entries()) {
-    const [topicRaw, ...rest] = line.split("|");
+    const [topicRaw = "", ...rest] = line.split("|");
     const topic = topicRaw.trim();
     const brief = rest.join("|").trim();
     if (topic.length < 5 || topic.length > 300) {

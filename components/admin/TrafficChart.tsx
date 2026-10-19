@@ -24,7 +24,9 @@ export function TrafficChart({ daily }: { daily: { day: string; views: number; v
       </div>
       <div className="mt-2 flex justify-between text-[11px] text-neutral-400">
         <span>{daily[0] ? fmt.format(new Date(`${daily[0].day}T00:00:00Z`)) : ""}</span>
-        {!dense && daily.length > 2 && <span>{fmt.format(new Date(`${daily[Math.floor(daily.length / 2)].day}T00:00:00Z`))}</span>}
+        {!dense && daily.length > 2 && daily[Math.floor(daily.length / 2)] ? (
+          <span>{fmt.format(new Date(`${daily[Math.floor(daily.length / 2)]!.day}T00:00:00Z`))}</span>
+        ) : null}
         <span>{daily.at(-1) ? fmt.format(new Date(`${daily.at(-1)!.day}T00:00:00Z`)) : ""}</span>
       </div>
       <p className="mt-3 flex gap-4 text-[11px] text-neutral-500">

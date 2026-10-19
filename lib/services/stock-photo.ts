@@ -52,6 +52,7 @@ export async function findStockPhoto(query: string | undefined, categorySlug: st
 
     // Acak ringan dari 5 teratas supaya artikel serupa tidak memakai foto sama.
     const photo = pool[Math.floor(Math.random() * pool.length)];
+    if (!photo) return null;
 
     // Wajib menurut pedoman API: laporkan pemakaian foto.
     if (photo.links?.download_location) {
@@ -72,7 +73,7 @@ export async function findStockPhoto(query: string | undefined, categorySlug: st
 /** Pisahkan teks kredit dan tautan profil ("teks|url") yang disimpan di database. */
 export function parseCredit(credit: string | null | undefined): { text: string; href: string | null } | null {
   if (!credit) return null;
-  const [text, href] = credit.split("|");
+  const [text = "", href] = credit.split("|");
   const safe = href && /^https:\/\/unsplash\.com\//.test(href) ? `${href}?utm_source=teknokini&utm_medium=referral` : null;
   return { text, href: safe };
 }
