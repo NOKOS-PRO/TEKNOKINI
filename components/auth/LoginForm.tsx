@@ -14,16 +14,16 @@ export function LoginForm({ next }: { next: string }) {
 
       <div>
         <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-neutral-700">
-          Email
+          Email atau username
         </label>
         <input
           id="email"
           name="email"
-          type="email"
+          type="text"
           required
-          autoComplete="email"
+          autoComplete="username"
           className="w-full rounded-lg border border-neutral-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          placeholder="nama@teknokini.id"
+          placeholder="kangstore88"
         />
       </div>
 
