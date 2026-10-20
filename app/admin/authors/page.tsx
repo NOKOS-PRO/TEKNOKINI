@@ -27,7 +27,7 @@ export default async function AuthorsPage() {
               </div>
               <ConfirmDeleteButton
                 confirmMessage={`Hapus penulis "${author.name}"?`}
-                action={() => deleteAuthorAction(author.id)}
+                action={deleteAuthorAction.bind(null, author.id)}
               />
             </div>
             {author.bio && <p className="mt-2 line-clamp-2 text-sm text-neutral-500">{author.bio}</p>}

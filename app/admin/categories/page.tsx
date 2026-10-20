@@ -42,7 +42,7 @@ export default async function CategoriesPage() {
                 <td className="px-4 py-3 text-right">
                   <ConfirmDeleteButton
                     confirmMessage={`Hapus kategori "${c.name}"?`}
-                    action={() => deleteCategoryAction(c.id)}
+                    action={deleteCategoryAction.bind(null, c.id)}
                   />
                 </td>
               </tr>

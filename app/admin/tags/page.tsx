@@ -26,7 +26,7 @@ export default async function TagsPage() {
             #{tag.name}
             <ConfirmDeleteButton
               confirmMessage={`Hapus tag "${tag.name}"?`}
-              action={() => deleteTagAction(tag.id)}
+              action={deleteTagAction.bind(null, tag.id)}
             />
           </span>
         ))}
