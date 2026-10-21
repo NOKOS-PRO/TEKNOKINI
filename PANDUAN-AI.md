@@ -270,6 +270,12 @@ curl -X POST https://teknokini.vercel.app/api/agent/articles \
 
 Kalau `AGENT_SECRET`/`CRON_SECRET` di Vercel berbeda dari `.env.local`, pakai yang versi Vercel.
 
+> **Temuan saat uji:** `POST https://teknokini.vercel.app/api/agent/articles` dengan
+> `AGENT_SECRET` dari `.env.local` membalas `{"error":"Unauthorized"}` (401) → secret di
+> Vercel **berbeda** dari `.env.local`. Supaya bisa memicu bot produksi dari komputer ini,
+> samakan keduanya: Vercel → Settings → Environment Variables → `AGENT_SECRET` (dan
+> `CRON_SECRET`), lalu isi nilai yang sama di `.env.local`.
+
 ---
 
 ## 7. Daftar error & penyebabnya
