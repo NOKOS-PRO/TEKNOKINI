@@ -1,6 +1,8 @@
 # Panduan Lanjutan — TeknoKini
 
 > Siap online: ikuti `DEPLOY.md`. Penjadwalan artikel sudah otomatis (migration 0004), rencana konten dan trafik live (migration 0006).
+>
+> Uji AI bikin artikel (langkah demi langkah, sudah diverifikasi): **`PANDUAN-AI.md`**.
 
 Ini bukan lagi cuma fondasi Phase 1 — semua phase (Auth sampai SEO) sudah diimplementasikan.
 Dokumen ini pelengkap `README.md`: fokusnya "apa yang sudah bisa dipakai", "apa yang perlu

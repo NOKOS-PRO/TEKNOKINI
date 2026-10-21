@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { generateTopicArticle } from "@/lib/services/llm";
+import { generateTopicArticle, isUsableDraft } from "@/lib/services/llm";
 import { findStockPhoto } from "@/lib/services/stock-photo";
 import { PLAN_LEAD_HOURS, PLAN_MAX_ATTEMPTS } from "@/lib/services/content-plan";
 import { slugify, withUniqueSuffix } from "@/lib/utils/slug";
@@ -54,8 +54,8 @@ export async function draftPlanItem(supabase: Supabase, planId: string): Promise
       categoryName: category.name,
     });
     const content = draft.content.trim();
-    if (content.split(/\n\s*\n/).filter(Boolean).length < 3) {
-      throw new Error("Draf kurang dari 3 paragraf, tidak disimpan.");
+    if (!isUsableDraft(content)) {
+      throw new Error("Draf terlalu pendek untuk jadi artikel, tidak disimpan.");
     }
 
     let slug = slugify(draft.title);

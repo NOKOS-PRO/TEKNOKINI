@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { generateArticleDraft, type GeneratedDraft } from "@/lib/services/llm";
+import { generateArticleDraft, isUsableDraft, type GeneratedDraft } from "@/lib/services/llm";
 import { fetchFeedItems } from "@/lib/services/rss";
 import { findStockPhoto } from "@/lib/services/stock-photo";
 import { AGENT_SOURCES } from "@/lib/config/agent-sources";
@@ -76,8 +76,8 @@ async function processOneItem(params: {
   const draft = fitDraft(
     await generateArticleDraft({ sourceName, sourceUrl: link, sourceText: text, categoryHint: categorySlug }),
   );
-  if (draft.content.split(/\n\s*\n/).filter(Boolean).length < 3) {
-    throw new Error(`Draft untuk "${title}" kurang dari 3 paragraf, tidak disimpan.`);
+  if (!isUsableDraft(draft.content)) {
+    throw new Error(`Draft untuk "${title}" terlalu pendek untuk jadi artikel, tidak disimpan.`);
   }
 
   let slug = slugify(draft.title);

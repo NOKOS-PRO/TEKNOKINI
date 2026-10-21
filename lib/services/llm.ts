@@ -35,6 +35,13 @@ const LLM_BASE_URL = (process.env.LLM_BASE_URL ?? "https://openrouter.ai/api/v1"
 const LLM_MODEL = process.env.LLM_MODEL;
 /** Opsional (OpenRouter): "low" | "medium" | "high". "low" menekan token reasoning sehingga lebih murah dan cepat. */
 const LLM_REASONING_EFFORT = process.env.LLM_REASONING_EFFORT;
+/**
+ * Batas token keluaran per permintaan. WAJIB diisi eksplisit: tanpa ini provider memakai
+ * batas maksimum model (ratusan ribu token), lalu OpenRouter menolak request dengan
+ * 402 "requires more credits" walau pemakaian sebenarnya hanya beberapa ribu token.
+ * 4000 token ≈ 2.500–3.000 kata — cukup untuk satu artikel 700–1.100 kata.
+ */
+const LLM_MAX_TOKENS = Number(process.env.LLM_MAX_TOKENS) || 4000;
 
 const JSON_SHAPE = `{"title": "...", "excerpt": "...", "content": "... (Markdown, minimal 3 paragraf) ...", "seo_title": "...", "seo_description": "...", "image_query": "2-4 kata kunci bahasa Inggris untuk foto sampul yang NATURAL dan relevan (contoh: \\"developer typing laptop\\", \\"smartphone in hand\\"), tanpa nama merek atau orang"}`;
 
@@ -69,17 +76,72 @@ ATURAN WAJIB (akurasi):
 Kembalikan HANYA JSON valid, tanpa teks lain, dengan struktur persis:
 ${JSON_SHAPE.replace(/}$/, ', "fact_check": "..."}')}`;
 
-function extractJson(raw: string): unknown {
-  const cleaned = raw.trim().replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```$/, "");
-  try {
-    return JSON.parse(cleaned);
-  } catch {
-    // Beberapa model menambah teks di sekitar JSON; ambil objek terluar.
-    const start = cleaned.indexOf("{");
-    const end = cleaned.lastIndexOf("}");
-    if (start >= 0 && end > start) return JSON.parse(cleaned.slice(start, end + 1));
-    throw new Error("Respons LLM bukan JSON yang valid.");
+/**
+ * Perbaiki JSON yang rusak oleh model: karakter kontrol mentah di dalam string
+ * (mis. tab/newline) dan escape yang tidak valid (mis. "\(").
+ */
+function repairJson(text: string): string {
+  let out = "";
+  let inString = false;
+  let escaped = false;
+  for (const ch of text) {
+    if (!inString) {
+      if (ch === '"') inString = true;
+      out += ch;
+      continue;
+    }
+    if (escaped) {
+      out += ch;
+      escaped = false;
+      continue;
+    }
+    if (ch === "\\") {
+      out += ch;
+      escaped = true;
+      continue;
+    }
+    if (ch === '"') {
+      inString = false;
+      out += ch;
+      continue;
+    }
+    // Karakter kontrol di dalam string JSON tidak valid -> ganti spasi.
+    out += ch.charCodeAt(0) < 0x20 ? " " : ch;
   }
+  // Escape backslash yang tidak diikuti karakter escape JSON yang valid.
+  return out.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
+}
+
+function extractJson(raw: string): unknown {
+  const cleaned = raw.trim().replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```$/, "").trim();
+  const candidates = [cleaned];
+  // Beberapa model menambah teks di sekitar JSON; ambil objek terluar.
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start >= 0 && end > start) candidates.push(cleaned.slice(start, end + 1));
+
+  for (const candidate of candidates) {
+    for (const text of [candidate, repairJson(candidate)]) {
+      try {
+        return JSON.parse(text);
+      } catch {
+        // coba variasi berikutnya
+      }
+    }
+  }
+  throw new Error("Respons LLM bukan JSON yang valid.");
+}
+
+/**
+ * Draf dianggap tidak layak kalau isinya terlalu pendek untuk jadi artikel.
+ * Dihitung per kata (bukan per baris kosong) karena beberapa model menulis
+ * paragraf dengan satu baris kosong di antaranya atau tanpa baris kosong sama sekali.
+ */
+export function isUsableDraft(content: string): boolean {
+  const words = content.split(/\s+/).filter(Boolean).length;
+  const blocks = content.split(/\n\s*\n/).filter((s) => s.trim()).length;
+  const lines = content.split("\n").filter((s) => s.trim()).length;
+  return words >= 120 && (blocks >= 3 || lines >= 3);
 }
 
 async function callLlm(messages: { role: "system" | "user"; content: string }[], temperature: number): Promise<string> {
@@ -106,6 +168,7 @@ async function callLlm(messages: { role: "system" | "user"; content: string }[],
       model: LLM_MODEL,
       messages,
       temperature,
+      max_tokens: LLM_MAX_TOKENS,
       ...(LLM_REASONING_EFFORT && LLM_BASE_URL.includes("openrouter.ai")
         ? { reasoning: { effort: LLM_REASONING_EFFORT } }
         : {}),
