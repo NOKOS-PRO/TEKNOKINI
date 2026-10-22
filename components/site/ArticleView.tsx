@@ -111,6 +111,24 @@ export function ArticleView({
         <MarkdownContent content={article.content} />
       </div>
 
+      {related.length > 0 && (
+        <nav aria-label="Baca juga" className="mt-8 rounded-xl border border-line bg-neutral-50 p-4">
+          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-neutral-500">Baca juga</p>
+          <ul className="list-disc space-y-1 pl-4">
+            {related.slice(0, 3).map((a) => (
+              <li key={a.id}>
+                <Link
+                  href={`/berita/${a.slug}`}
+                  className="text-sm font-semibold text-ink hover:text-brand-600 hover:underline"
+                >
+                  {a.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
       <div className="my-6">
         <AdSlot slot="article-middle" />
       </div>

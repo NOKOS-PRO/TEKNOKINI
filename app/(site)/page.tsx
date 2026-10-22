@@ -28,7 +28,7 @@ function SectionHead({ title, id }: { title: string; id?: string }) {
 
 export default async function HomePage() {
   const [{ articles: latest }, popular, categories, tags, counts] = await Promise.all([
-    getPublishedArticles({ pageSize: 10 }),
+    getPublishedArticles({ pageSize: 6 }),
     getPopularArticles(5),
     listCategories(),
     listTags(),
