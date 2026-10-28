@@ -1,10 +1,29 @@
 import type { MetadataRoute } from "next";
+import { createServerClient } from "@supabase/ssr";
 import { siteConfig } from "@/lib/config/site";
-import { createClient } from "@/lib/supabase/server";
 import { PUBLIC_STATUSES } from "@/lib/services/articles";
 
+// Cache 6 jam di edge CDN. Tanpa ini sitemap di-render ulang per permintaan
+// (query Supabase bisa 10-26 detik saat dingin) dan Google gagal mengambilnya.
+// 6 jam = jendela render dingin hanya ~4x sehari, sisanya respons HIT cepat.
+export const revalidate = 21600;
+
+/**
+ * Sitemap tidak boleh memakai createClient() dari lib/supabase/server karena
+ * fungsi itu memanggil cookies() (API request-time) — itu membuat route
+ * dinamis dan Next menolak men-cache-nya. Klien anonim tanpa cookie cukup,
+ * karena yang dibaca hanya artikel publik dan kategori (RLS tetap berlaku).
+ */
+function createPublicClient() {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => [], setAll: () => {} } },
+  );
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const [{ data: articles }, { data: categories }] = await Promise.all([
     supabase
