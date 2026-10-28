@@ -3,9 +3,18 @@ import { createServerClient } from "@supabase/ssr";
 import { siteConfig } from "@/lib/config/site";
 import { PUBLIC_STATUSES } from "@/lib/services/articles";
 
-// Cache 6 jam di edge CDN. Tanpa ini sitemap di-render ulang per permintaan
-// (query Supabase bisa 10-26 detik saat dingin) dan Google gagal mengambilnya.
-// 6 jam = jendela render dingin hanya ~4x sehari, sisanya respons HIT cepat.
+/**
+ * Diperlakukan sebagai halaman statis: dirender sekali saat build, lalu
+ * disajikan sebagai file dari SELURUH POP CDN (bukan dirender per permintaan
+ * di region tertentu). Ini yang penting untuk Googlebot — cache Vercel itu
+ * per lokasi, jadi route dinamis bisa "dingin" di POP yang dipakai Google
+ * (query Supabase 3-26 detik) dan fetcher GSC menyerah.
+ *
+ * revalidate 6 jam: file di-regenerasi di latar belakang, pengunjung selalu
+ * dapat salinan cepat. Artikel baru ikut masuk maksimal 6 jam setelah tayang
+ * (dan setiap kali deploy ulang).
+ */
+export const dynamic = "force-static";
 export const revalidate = 21600;
 
 /**
