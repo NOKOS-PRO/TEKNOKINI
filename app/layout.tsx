@@ -11,7 +11,7 @@ const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrai
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} — ${siteConfig.tagline}`,
+    default: `${siteConfig.homeTitle} | ${siteConfig.name}`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,

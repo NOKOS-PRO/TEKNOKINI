@@ -81,6 +81,7 @@ export async function saveArticleAction(
 
   revalidatePath("/admin/articles");
   revalidatePath("/");
+  revalidatePath("/sitemap.xml");
   redirect(`/admin/articles/${savedId}/edit?saved=1`);
 }
 
@@ -88,5 +89,6 @@ export async function deleteArticleAction(id: string) {
   await requireProfile();
   await deleteArticle(id);
   revalidatePath("/admin/articles");
+  revalidatePath("/sitemap.xml");
   redirect("/admin/articles");
 }

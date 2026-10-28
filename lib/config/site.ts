@@ -10,8 +10,10 @@
 export const siteConfig = {
   name: "TeknoKini",
   tagline: "Update Teknologi Hari Ini. Cepat, Ringkas, Terpercaya.",
+  /** Judul beranda (meta title) — fokus kata kunci utama. */
+  homeTitle: "Berita Teknologi AI 2026",
   description:
-    "Portal berita teknologi Indonesia: AI, teknologi, internet, gadget, dan tips terbaru.",
+    "Berita teknologi AI 2026 terbaru: kecerdasan buatan, teknologi, internet, gadget, dan tips untuk pembaca Indonesia.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   locale: "id_ID",
   defaultOgImage: "/og-default.png",
