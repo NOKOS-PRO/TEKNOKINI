@@ -25,6 +25,11 @@ export const metadata: Metadata = {
     card: "summary_large_image",
   },
   robots: { index: true, follow: true },
+  // Google Search Console: verifikasi kepemilikan via meta tag. Kosong = tag tidak
+  // dirender (Next melewati nilai kosong), jadi aman untuk development.
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
   alternates: { types: { "application/rss+xml": "/feed.xml" } },
 };
 
